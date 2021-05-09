@@ -39,8 +39,21 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
         }
-        _ => {
+        "install" | "i" | "update" | "up" => {
             pass_to_pnpm(&args[1..])?;
+            Ok(())
+        }
+        _ => {
+            let mut path_env: String = "node_modules/.bin".to_owned();
+            path_env.push_str(":");
+            path_env.push_str(env!("PATH"));
+            let mut child  = Command::new("sh")
+                .env("PATH", path_env)
+                .arg("-c")
+                .arg(&args[1..].join(" "))
+                .stdout(std::process::Stdio::inherit())
+                .spawn()?;
+            child.wait()?;
             Ok(())
         }
     }
